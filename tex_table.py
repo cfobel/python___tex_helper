@@ -17,13 +17,12 @@ table_template = r'''
 
 \begin{document}
 
-\footnotesize
+\%s
 {
 \ctable[
   label = {%s},
   caption = {%s},
-  sideways
-]
+%s]
 {%s}{
 }{
 %%(data)s
@@ -36,11 +35,18 @@ table_template = r'''
 
 
 class Table(object):
-    def __init__(self, caption, label, layout):
+    def __init__(self, caption, label, layout, sideways=False,
+                    fontsize='footnotesize'):
         self.caption = caption
         self.label = label
         self.layout = layout
-        self.template = table_template % (label, caption, layout)
+        self.sideways = sideways
+        if sideways:
+            sideways = '  sideways,\n'
+        else:
+            sideways = ''
+        self.template = table_template % (fontsize, label, caption,
+                                            sideways, layout)
         self.data = []
 
     
