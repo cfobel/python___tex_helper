@@ -57,7 +57,8 @@ def compile_pdf(tex_source, out_path, tex_output=False,
 
 
 def compile_figure_set(out_path, figure_list,
-                        tex_output=False, include_paths=None):
+                        tex_output=False, include_paths=None,
+                        left_header=None, right_header=None):
     import re
 
     include_paths = include_paths or []
@@ -82,7 +83,17 @@ def compile_figure_set(out_path, figure_list,
         set_idx += figs_per_page
 
     tex_src = (script_path().parent / path('fig_template.tex')).bytes()
+    tex_src = re.sub(r'~!~!~!~!', '\n'.join(fig_src), tex_src)
+    if left_header:
+        tex_src = re.sub(r'~!<<LEFTHEADER>>~!', r'\\lhead{%s}' % left_header, tex_src)
+    else:
+        tex_src = re.sub(r'~!<<LEFTHEADER>>~!', '', tex_src)
+    if right_header:
+        tex_src = re.sub(r'~!<<RIGHTHEADER>>~!', r'\\rhead{%s}' % right_header, tex_src)
+    else:
+        tex_src = re.sub(r'~!<<RIGHTHEADER>>~!', '', tex_src)
 
     compile_pdf(re.sub(r'~!~!~!~!', '\n'.join(fig_src), tex_src), 
                 out_path,
-                include_paths=include_paths)
+                include_paths=include_paths,
+                tex_output=True)
