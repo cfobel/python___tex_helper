@@ -1,3 +1,5 @@
+from tex_util import set_headers
+
 def escape_tex(data):
     import re
 
@@ -5,7 +7,6 @@ def escape_tex(data):
 
 table_template = r'''
 \documentclass[12pt,letter]{article}
-\PassOptionsToPackage{pdftex}{graphics}
 \usepackage{styles/subfigure}
 \usepackage{styles/ctable}
 
@@ -14,6 +15,12 @@ table_template = r'''
 \textwidth 7in
 \topmargin -0.5in
 \textheight 9.0in
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+~!<<LEFTHEADER>>~!
+~!<<RIGHTHEADER>>~!
+\cfoot{\large\thepage}
 
 \begin{document}
 
@@ -36,11 +43,14 @@ table_template = r'''
 
 class Table(object):
     def __init__(self, caption, label, layout, sideways=False,
-                    fontsize='footnotesize'):
+                    fontsize='footnotesize',
+                    left_header=None, right_header=None):
         self.caption = caption
         self.label = label
         self.layout = layout
         self.sideways = sideways
+        self.left_header = left_header
+        self.right_header = right_header
         if sideways:
             sideways = '  sideways,\n'
         else:
@@ -69,7 +79,9 @@ class Table(object):
                     # We must add a separator.
                     output.append(Separator())
 
-        return self.template % {'data': '\n'.join([str(line) for line in output])}
+        return set_headers(self.template \
+            % {'data': '\n'.join([str(line) for line in output])},
+            self.left_header, self.right_header)
 
 
 class Cell(object):

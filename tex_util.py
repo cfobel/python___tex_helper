@@ -13,6 +13,20 @@ def script_path():
     return script
 
 
+def set_headers(tex_src, left_header=None, right_header=None):
+    import re
+
+    if left_header:
+        tex_src = re.sub(r'~!<<LEFTHEADER>>~!', r'\\lhead{%s}' % left_header, tex_src)
+    else:
+        tex_src = re.sub(r'~!<<LEFTHEADER>>~!', '', tex_src)
+    if right_header:
+        tex_src = re.sub(r'~!<<RIGHTHEADER>>~!', r'\\rhead{%s}' % right_header, tex_src)
+    else:
+        tex_src = re.sub(r'~!<<RIGHTHEADER>>~!', '', tex_src)
+    return tex_src
+
+
 def compile_pdf(tex_source, out_path, tex_output=False,
                 include_paths=None):
     import os
