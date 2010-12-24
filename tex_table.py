@@ -9,6 +9,7 @@ table_template = r'''
 \documentclass[12pt,letter]{article}
 \usepackage{styles/subfigure}
 \usepackage{styles/ctable}
+\usepackage{styles/multirow}
 
 \oddsidemargin -0.25in
 \evensidemargin 0.0in
@@ -39,24 +40,23 @@ table_template = r'''
 \end{document}
 '''
 
-
-
 class Table(object):
     def __init__(self, caption, label, layout, sideways=False,
                     fontsize='footnotesize',
-                    left_header=None, right_header=None):
+                    left_header=None, right_header=None, width=None):
         self.caption = caption
         self.label = label
         self.layout = layout
         self.sideways = sideways
         self.left_header = left_header
         self.right_header = right_header
+        options = []
         if sideways:
-            sideways = '  sideways,\n'
-        else:
-            sideways = ''
+            options.append('  sideways')
+        if width:
+            options.append('  width = {%s}' % width)
         self.template = table_template % (fontsize, label, caption,
-                                            sideways, layout)
+                                            ',\n'.join(options), layout)
         self.data = []
 
     
@@ -86,15 +86,16 @@ class Table(object):
 
 class Cell(object):
     def __init__(self, contents, alignment, forced=False,
-                    left_line=False,
-                    right_line=False, span=1, bold=False,
-                    italic=False):
+                    left_line=False, right_line=False, 
+                    rowspan=1, colspan=1, 
+                    bold=False, italic=False):
         self.contents = contents
         self.alignment = alignment
         self.forced = forced
         self.left_line = left_line
         self.right_line = right_line
-        self.span = span
+        self.rowspan = rowspan
+        self.colspan = colspan
         self.bold = bold
         self.italic = italic
 
@@ -111,15 +112,17 @@ class Cell(object):
         if self.bold:
             data = r'\textbf{%s}' % data
 
-        if self.span > 1 or self.left_line\
+        if self.colspan > 1 or self.left_line\
                 or self.right_line or self.forced:
             alignment = self.alignment
             if self.left_line:
                 alignment = '|%s' % alignment
             if self.right_line:
                 alignment = '%s|' % alignment
-            data = r'\multicolumn{%s}{%s}{%s}' % (self.span, 
+            data = r'\multicolumn{%s}{%s}{%s}' % (self.colspan, 
                         alignment, data)
+        if self.rowspan > 1:
+            data = r'\multirow{%s}{*}{%s}' % (self.rowspan, data)
         return data
 
 
@@ -141,3 +144,9 @@ class Separator(object):
 
     def __str__(self):
         return self.style
+
+
+first_line = Separator(style=r'\FL')
+middle_line = Separator(style=r'\ML')
+last_line = Separator(style=r'\LL')
+new_line = Separator(style=r'\\')
