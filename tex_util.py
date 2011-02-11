@@ -1,4 +1,5 @@
 from path import path
+from subprocess import check_call, Popen, PIPE
 
 def script_path():
     try:
@@ -31,7 +32,6 @@ def compile_pdf(tex_source, out_path, tex_output=False,
                 include_paths=None):
     import os
     import tempfile
-    from subprocess import check_call, PIPE
 
     include_paths = include_paths or []
     cwd = os.getcwd()
@@ -111,3 +111,41 @@ def compile_figure_set(out_path, figure_list,
                 out_path,
                 include_paths=include_paths,
                 tex_output=True)
+
+
+
+class PDFBuilder(object):
+    def __init__(self, tex_path):
+        self.tex_path = path(tex_path)
+        self.scons_path = path('SConstruct')
+        i = 0
+        while self.scons_path.isfile():
+            self.scons_path = path('%s%d' % (self.scons_path, i))
+        print 'using SConstruct path: %s' % self.scons_path
+        self.pdf_path = path('%s.pdf' % self.tex_path.namebase)
+        sc_txt = '''PDF('%s', '%s')''' % (self.pdf_path, self.tex_path)
+        self.scons_path.write_lines([sc_txt])
+
+
+    def open(self):
+        check_call(['gnome-open', self.pdf_path], stdout=PIPE, stderr=PIPE)
+
+
+    def build(self, verbose=False):
+        # build pdf
+        cmd = ['scons', '-f', self.scons_path]
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        out, err = p.communicate()
+        if not p.returncode == 0:
+            print out
+            print err
+            self.cleanup()
+        return (p.returncode == 0)
+
+
+    def cleanup(self):
+        check_call(['scons', '-f', self.scons_path, '-c'])
+        if self.scons_path.isfile():
+            self.scons_path.remove()
+        if self.pdf_path.isfile():
+            self.pdf_path.remove()
