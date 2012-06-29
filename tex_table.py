@@ -25,8 +25,8 @@ table_template = r'''
 
 \begin{document}
 
-\%s
 {
+\%s
 \ctable[
   label = {%s},
   caption = {%s},

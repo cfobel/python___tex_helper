@@ -33,7 +33,8 @@ def compile_pdf(tex_source, out_path, tex_output=False,
     import os
     import tempfile
 
-    include_paths = include_paths or []
+    include_paths = include_paths if include_paths else []
+    include_paths = [p.abspath() for p in include_paths]
     cwd = os.getcwd()
     out_path = path(out_path)
 
