@@ -10,5 +10,9 @@ setup(name = "tex-helper",
     url = "https://github.com/cfobel/python___tex_helper",
     license = "LGPL",
     long_description = """""",
-    packages = ['tex_helper']
+    packages = ['tex_helper'],
+    package_data = {'tex_helper': ['fig_template.tex',
+            'styles/ctable.sty',
+            'styles/multirow.sty',
+            'styles/subfigure.sty',]}
 )
